@@ -1,10 +1,10 @@
-# EJERCICIO 1
-	# Modelo Físico
+# EXERCISE 1 
+	# Physical Model
     
--- Creamos un esquema de base de datos con el nombre prestamos_2015
+-- We create a database schema with the name prestamos_2015
 CREATE SCHEMA prestamos_2015;
 
--- Creamos las tres tablas correspondientes a los 3 archivos:
+-- We create the three tables corresponding to the 3 files:
 CREATE TABLE prestamos_2015.merchants(
 merchant_id varchar(50),
 name varchar(50)
@@ -27,87 +27,87 @@ amount FLOAT
 
 
 
-# EJERCICIO 2
+# EXERCISE 2
 
-# 1.- Realizamos una consulta para obtener por país y estado de la operación el total de operaciones y su importe promedio
+# 1.- We carry out a query to obtain by country and status of the operation the total number of operations and their average amount
 
--- Seleccionamos las columnas que queremos obtener en la consulta: país y estado de la operación, total de operaciones y su importe promedio
+-- Select the columns we want to obtain in the query: country and status of the operation, total operations and their average amount
 SELECT o.country, 
 	o.status, 
-    COUNT(*) AS total_operaciones, -- Obtenemos el conteo de las operaciones
-    ROUND(AVG(o.amount),2) AS importe_promedio  -- Redondeamos el importe promedio a dos decimales
+    COUNT(*) AS total_operaciones, -- We get the count of the operations
+    ROUND(AVG(o.amount),2) AS importe_promedio  -- We round the average amount to two decimal places
 FROM 
-	orders AS o  -- Obtenemos los datos de la tabla orders
-WHERE o.created_at > '2015-07-01 23:59:59'  -- Operaciones posteriores al 01-07-2015
-  AND o.country IN ('Francia', 'Portugal', 'España') -- Operaciones realizadas en Francia, Portugal y España
-  AND o.amount BETWEEN 100 AND 1500 -- Operaciones con un valor mayor de 100 € y menor de 1500€
-GROUP BY o.country, o.status  -- Agrupamos los resultados por país y estado de la operación
-ORDER BY importe_promedio DESC;  -- Ordenamos los resultados por el promedio del importe de manera descendente
+	orders AS o  -- We get the data from the orders table
+WHERE o.created_at > '2015-07-01 23:59:59'  -- Operations after 01-07-2015
+  AND o.country IN ('Francia', 'Portugal', 'España') -- Operations carried out in France, Portugal and Spain
+  AND o.amount BETWEEN 100 AND 1500 -- Transactions with a value greater than €100 and less than €1500
+GROUP BY o.country, o.status  -- We group the results by country and operation status
+ORDER BY importe_promedio DESC;  -- We sort the results by the average amount in descending order
 
 
-# 2.- Realizamos una consulta para obtener los 3 países con el mayor número de operaciones, el total de operaciones, la operación con un valor máximo y la operación con el valor mínimo para cada país
+# 2.- We conduct a query to obtain the 3 countries with the highest number of trades, the total trades, the trade with a maximum value, and the trade with the minimum value for each country
 
--- Seleccionamos las columnas que queremos obtener en la consulta: país, total de operaciones por país e importe máximo y mínimo por país
+-- Select the columns we want to obtain in the query: country, total operations by country and maximum and minimum amount by country
 SELECT o.country, 
-    COUNT(*) AS total_operaciones, -- Obtenemos el conteo de operaciones
+    COUNT(*) AS total_operaciones, -- We get the trade count
     MAX(o.amount) AS importe_maximo, 
     MIN(o.amount) AS importe_minimo
 FROM 	
-	orders AS o  -- Obtenemos los datos de la tabla orders
-WHERE o.status NOT IN ('Delinquent', 'Cancelled')  -- Excluimos las operaciones con el estado “Delinquent” y “Cancelled”
-    AND o.amount > 100  -- Operaciones con un valor mayor de 100 €
-GROUP BY o.country   -- Agrupamos los resultados por país
-ORDER BY total_operaciones DESC  -- Ordenamos de forma descendente para que los países con el mayor número de operaciones aparezcan primero en la lista
-LIMIT 3; -- Solo queremos los 3 países con el mayor número de operaciones 
+	orders AS o  -- We get the data from the orders table
+WHERE o.status NOT IN ('Delinquent', 'Cancelled')  -- We exclude operations with the status "Delinquent" and "Cancelled"
+    AND o.amount > 100  -- Transactions with a value greater than €100
+GROUP BY o.country   -- We group the results by country
+ORDER BY total_operaciones DESC  -- We sort in descending order so that the countries with the highest number of transactions appear first in the list
+LIMIT 3; -- We only want the 3 countries with the highest number of trades
 
 
 
-# EJERCICIO 3
+# EXERCISE 3
 
-# 1.- Realizamos una consulta para obtener por país y comercio, el total de operaciones, su valor promedio y el total de devoluciones
+# 1.- We made a query to obtain by country and trade, the total of operations, their average value and the total of returns
 
--- Seleccionamos las columnas que queremos obtener en la consulta: país, ID del comercio y su nombre, total de operaciones, su valor promedio y el total de devoluciones
+-- We select the columns we want to obtain in the query: country, merchant ID and its name, total transactions, its average value and total returns
 SELECT o.country, 
     m.merchant_id, 
     m.name AS nombre_comercio, 
-    COUNT(o.merchant_id) AS total_operaciones,  -- Obtenemos el conteo de operaciones
-    ROUND(AVG(o.amount),2) AS valor_promedio,   -- Redondeamos el valor promedio a dos decimales
-    COALESCE(SUM(r.conteo_devoluciones),0) AS conteo_devoluciones,  -- Obtenemos el conteo de las devoluciones
-CASE WHEN SUM(r.suma_devoluciones) > 0 THEN 'Sí' ELSE 'No' END AS acepta_devoluciones  -- Para identificar si el comercio acepta o no devoluciones
-FROM orders AS o  -- Obtenemos los datos de la tabla orders	
-LEFT JOIN merchants AS m ON o.merchant_id = m.merchant_id  -- Unimos las tablas orders y merchants por el campo 'merchant_id'.
+    COUNT(o.merchant_id) AS total_operaciones,  -- We get the trade count
+    ROUND(AVG(o.amount),2) AS valor_promedio,   -- We rounded the average value to two decimal places
+    COALESCE(SUM(r.conteo_devoluciones),0) AS conteo_devoluciones,  -- We get the return count
+CASE WHEN SUM(r.suma_devoluciones) > 0 THEN 'Sí' ELSE 'No' END AS acepta_devoluciones  -- To identify whether or not the merchant accepts returns
+FROM orders AS o  -- We get the data from the orders table
+LEFT JOIN merchants AS m ON o.merchant_id = m.merchant_id  -- Join the orders and merchants tables with the 'merchant_id' field
 LEFT JOIN (
 SELECT order_id,
 	ROUND(SUM(amount),2) AS suma_devoluciones,
 	COUNT(*) AS conteo_devoluciones
 FROM refunds
 GROUP BY order_id
-) AS r ON o.order_id = r.order_id -- Realizamos una subquery para unir las tablas orders y refunds por el campo order_id
-WHERE o.country IN ('Marruecos', 'Italia', 'España', 'Portugal')  -- Comercios de Marruecos, Italia, España y Portugal
-GROUP BY o.country, m.merchant_id, m.name  -- Agrupamos los resultados por país, ID del comercio y su nombre
-HAVING total_operaciones > 10  -- Comercios con más de 10 ventas
-ORDER BY total_operaciones ASC;  -- Ordenamos los resultados por el total de operaciones de manera ascendente
+) AS r ON o.order_id = r.order_id -- We perform a subquery to join the orders and refunds tables by the order_id field
+WHERE o.country IN ('Marruecos', 'Italia', 'España', 'Portugal')  -- Shops in Morocco, Italy, Spain and Portugal
+GROUP BY o.country, m.merchant_id, m.name  -- We group the results by country, merchant ID and its name
+HAVING total_operaciones > 10  -- Businesses with more than 10 sales
+ORDER BY total_operaciones ASC;  -- We sort the results by the total number of operations in ascending order
     
     
-# 2.- Realizamos una consulta para el conteo de devoluciones
+# 2.- We carry out a consultation for the count of returns
 
--- Seleccionamos todos los campos de las tablas orders y merchants
+-- Select all fields from the orders and merchants tables
 SELECT o.*, 
-    m.merchant_id AS merch_id, -- Cambiamos el nombre puesto que en orders también existe una columna llamada 'mechant_id' y habría error de duplicados
+    m.merchant_id AS merch_id, -- We changed the name since in orders there is also a column called 'mechant_id' and there would be a duplicate error
     m.name AS nombre_comercio,
-    COALESCE(r.conteo_devoluciones,0) AS conteo_devoluciones, -- Obtenemos el conteo de devoluciones por operación
-    COALESCE(r.suma_devoluciones,0) AS suma_devoluciones -- Obtenemos la suma del valor de las devoluciones
-FROM orders AS o  --  Obtenemos los datos de la tabla orders
-LEFT JOIN merchants AS m ON o.merchant_id = m.merchant_id  -- Unimos las tablas orders y merchants por el campo merchant_id
+    COALESCE(r.conteo_devoluciones,0) AS conteo_devoluciones, -- We get the count of returns per operation
+    COALESCE(r.suma_devoluciones,0) AS suma_devoluciones -- We get the sum of the value of the returns
+FROM orders AS o  --  We get the data from the orders table
+LEFT JOIN merchants AS m ON o.merchant_id = m.merchant_id  -- Join the orders and merchants tables by the merchant_id field
 LEFT JOIN (
 SELECT order_id,
 	ROUND(SUM(amount),2) AS suma_devoluciones,
 	COUNT(*) AS conteo_devoluciones
 FROM refunds
 GROUP BY order_id
-) AS r ON o.order_id = r.order_id;  -- Realizamos una subquery para unir las tablas orders y refunds por el campo order_id
+) AS r ON o.order_id = r.order_id;  -- We perform a subquery to join the orders and refunds tables by the order_id field
 
--- Creamos la vista      
+-- We create the view      
 CREATE VIEW orders_view AS 
 SELECT o.*, 
     m.merchant_id AS merch_id,
@@ -128,20 +128,20 @@ GROUP BY order_id
  
  
  
- # EJERCICIO 4: Detección de fraude en transacciones
+ # EXERCISE 4
 
--- Objetivo de análisis: Detectar posibles casos de fraude en las operaciones financieras mediante la identificación de patrones
+-- Objective of analysis: Detect possible cases of fraud in financial transactions by identifying patterns
 	
-# 1.- Análisis de transacciones con importes significativamente altos o bajos en comparación con el promedio del país
+# 1.- Analysis of transactions with significantly high or low amounts compared to the country average
 
 SELECT o.country, 
 	o.order_id, 
     o.amount, 
     o_avg.promedio_pais AS promedio_pais,
     CASE
-        WHEN o.amount > o_avg.promedio_pais * 2 THEN 'Importe alto'	-- Se considera 'Importe alto' si es más de dos veces el promedio
-        WHEN o.amount < o_avg.promedio_pais / 2 THEN 'Importe bajo'	-- Se considera 'Importe bajo' si es menos de la mitad
-        ELSE 'Normal'  -- En el resto de casos se considera 'Normal'
+        WHEN o.amount > o_avg.promedio_pais * 2 THEN 'Importe alto'	-- It is considered 'High Amount' if it is more than twice the average
+        WHEN o.amount < o_avg.promedio_pais / 2 THEN 'Importe bajo'	-- It is considered 'Low Amount' if it is less than half
+        ELSE 'Normal'  -- In all other cases, it is considered 'Normal'
     END AS tipo_transaccion
 FROM orders AS o
 LEFT JOIN (
@@ -149,14 +149,14 @@ LEFT JOIN (
 		ROUND(AVG(amount),2) AS promedio_pais
 		FROM orders
 		GROUP BY country
-) AS o_avg ON o.country = o_avg.country  -- Unimos la tabla orders con la subquery de promedio por país
+) AS o_avg ON o.country = o_avg.country  -- We join the orders table with the average subquery by country
 GROUP BY o.country, o.order_id, o.amount, o_avg.promedio_pais 
-HAVING tipo_transaccion != 'Normal';  -- Excluimos las transacciones consideradas 'Normal'
+HAVING tipo_transaccion != 'Normal';  -- We exclude transactions considered 'Normal'
 
 
-# 2.- Análisis de transacciones con importes significativamente altos o bajos en comparación con el promedio del comercio 
+# 2.- Analysis of transactions with significantly high or low amounts compared to the average merchant
 
--- Hacemos el mismo código pero sustituyendo la variable 'country' por 'merchant_id'
+-- We make the same code but replacing the variable 'country' with 'merchant_id'
 SELECT m.name AS nombre_comercio, 
 	o.country,
     o.order_id, 
