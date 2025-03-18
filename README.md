@@ -36,6 +36,7 @@ The objective was to analyze loan operations from 2015 using SQL. The data consi
 - Data Modeling
 
 ## Sample Visuals
+
 - Logical Model
 ![image](https://github.com/user-attachments/assets/103c267a-4a90-4595-8380-171a1d2bea94)
 
