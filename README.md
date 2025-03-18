@@ -43,4 +43,4 @@ The objective was to analyze loan operations from 2015 using SQL. The data consi
 ![image](https://github.com/user-attachments/assets/3dc4e630-160c-43aa-9765-e92e4009187b)
 
 
-This project demonstrates my ability to work with structured data, write complex SQL queries, and extract business insights through data analysis.
+This project demonstrates core skills in working with structured data, writing advanced SQL queries, and extracting insights for business decision-making.
